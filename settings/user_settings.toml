@@ -1,0 +1,84 @@
+# Default settings
+
+# This file should not be modified as it will be overwritten on update
+# Intended as a backup only, use user_settings.toml 
+
+auto_update = false      # Check for updates to remote repo and automatically pull
+gzip_output = false     # If false save uncompressed .csv files, if true save compressed .csv.gz files
+
+[fields]
+
+[fields.race_info]
+    date = true         # Date of race
+    region = false       # Region of race
+    course_id = false   # RP Course ID
+    course = true       # Course name
+
+    race_id = false     # RP race ID
+    off = false          # Race off time
+    race_name = true    # Race name
+
+    type = true         # Type of racing (Flat/Hurdle/Chase etc)
+    class = true        # Race class
+    pattern = true      # Race Pattern (Group 1 etc)
+    
+    rating_band = false  # Rating restrictions
+    age_band = false     # Age restrictions
+    sex_rest = false     # Sex restrictions
+    
+    dist = false         # Distance in miles/furlongs/yards
+    dist_f = true       # Distance in furlongs
+    dist_m = false       # Distance in metres
+    dist_y = false      # Distance in yards
+    
+    going = true        # Going description
+    surface = false     # Surface Turf/Dirt/AW
+    ran = false          # Number of runners in race
+
+[fields.runner_info]
+    num = false          # Racecard number
+    pos = true          # Finishing position
+    draw = false        # Stall number
+    
+    ovr_btn = false      # Total number of lengths beaten
+    btn = false          # Lengths behind nearest horse in front
+    
+    horse_id = false    # RP Horse ID
+    horse = true        # Name of horse
+    age = false          # Age of horse
+    sex = false          # Sex of horse
+    
+    wgt = false         # Weight in stones/pounds
+    lbs = true          # Weight in pounds
+    
+    hg = false           # Headgear
+    
+    time = false         # Time in minutes/seconds
+    secs = false         # Time in seconds
+    
+    sp = false          # fractional odds
+    dec = false          # decimal odds
+    
+    jockey_id = false   # RP Jockey ID
+    jockey = false       # Jockey name
+    trainer_id = false  # RP Trainer ID
+    trainer = false      # Trainer name
+    
+    prize = false        # Prizemoney
+    
+    or = true           # Official rating
+    rpr = true          # RP Rating
+    ts = true          # TS rating
+    
+    sire_id = false     # RP Sire ID
+    sire = false         # Sire name
+    dam_id = false      # RP Dam ID
+    dam = false          # Dam name
+    damsire_id = false  # RP Damsire ID
+    damsire = false      # Damsire name
+    
+    owner_id = false    # RP Owner ID
+    owner = false        # Owner name
+    silk_url = false    # Url of owners silks image
+
+    comment = true      # Form in running comments

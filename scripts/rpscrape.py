@@ -4,6 +4,7 @@ import gzip
 import requests
 import os
 import sys
+import csv
 
 from dataclasses import dataclass
 
@@ -94,40 +95,150 @@ def get_race_urls_date(dates, region):
 
     return sorted(list(urls))
 
+def amend_csv(file_path):
+    """
+    Amend the generated CSV file by adding a new column 'amended ts'
+    with a formula N2 + (154 - K2) for each row.
+    """
+    print(f"Starting to amend the CSV file: {file_path}")
+    
+    temp_file = file_path + '.tmp'  # Temporary file to store amended data
+    print(f"Creating a temporary file: {temp_file}")
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as infile, open(temp_file, 'w', encoding='utf-8', newline='') as outfile:
+            print(f"Opened {file_path} for reading and {temp_file} for writing.")
+            
+            reader = csv.reader(infile)
+            writer = csv.writer(outfile)
+            
+            # Read the header row and add the new column
+            header = next(reader)
+            print(f"Original header: {header}")
+            header.append('amended ts')  # Add the new column
+            writer.writerow(header)
+            print("Amended the header and wrote it to the temporary file.")
+            
+            # Process and amend the rows
+            for row in reader:
+                # Extract N2 and K2 from the row, assuming N2 is in column 0 and K2 in column 1
+                # Convert to numeric values for calculation
+                try:
+                    n2 = float(row[13])  # Adjust column index if N2 is not in the 0th column
+                    k2 = float(row[10])  # Adjust column index if K2 is not in the 1st column
+                    amended_value = n2 + (154 - k2)  # Compute the amended value
+                except ValueError:
+                    # Handle rows where conversion fails (e.g., if N2/K2 are not numbers)
+                    amended_value = 0
+                
+                row.append(amended_value)  # Add the calculated value to the new column
+                
+                writer.writerow(row)  # Write the updated row to the temporary file
+            print("Processed all rows, added amendments")
+    except Exception as e:
+        print(f"Error occurred while amending the CSV: {e}")
+        raise
+
+    # Replace original file with amended file
+    os.replace(temp_file, file_path)
+    print(f"Replaced original CSV with amended CSV: {file_path}")
+    
+def amend_csv_remove_columns(file_path):
+    """
+    Remove columns with specific headers ('lbs', 'rpr', 'ts') from the CSV file.
+    """
+    headers_to_remove = ["lbs", "rpr", "ts"]  # Headers to target for removal
+    print(f"Starting to process the CSV file: {file_path}")
+    
+    temp_file = file_path + '.tmp'  # Temporary file to store amended data
+    print(f"Creating a temporary file: {temp_file}")
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as infile, open(temp_file, 'w', encoding='utf-8', newline='') as outfile:
+            print(f"Opened {file_path} for reading and {temp_file} for writing.")
+            
+            reader = csv.reader(infile)
+            writer = csv.writer(outfile)
+            
+            # Read the header row
+            header = next(reader)
+            print(f"Original header: {header}")
+            
+            # Identify the indices of the columns to remove based on the header values
+            indices_to_remove = [idx for idx, col in enumerate(header) if col in headers_to_remove]
+            print(f"Columns to remove (indices): {indices_to_remove}")
+            
+            # Create a new header without the columns to remove
+            updated_header = [col for idx, col in enumerate(header) if idx not in indices_to_remove]
+            writer.writerow(updated_header)
+            print(f"Updated header: {updated_header}")
+            
+            # Process each row and remove the corresponding columns
+            for row in reader:
+                updated_row = [val for idx, val in enumerate(row) if idx not in indices_to_remove]
+                writer.writerow(updated_row)
+            print("Processed all rows and removed the specified columns.")
+    except Exception as e:
+        print(f"Error occurred while processing the CSV: {e}")
+        raise
+
+    # Replace the original file with the updated file
+    os.replace(temp_file, file_path)
+    print(f"Replaced original CSV with updated CSV: {file_path}")    
+
 
 def scrape_races(races, folder_name, file_name, file_extension, code, file_writer):
+    """
+    Scrape races and write results to a CSV file with echo commands.
+    """
     out_dir = f'../data/{folder_name}/{code}'
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
+        print(f"Created output directory: {out_dir}")
 
     file_path = f'{out_dir}/{file_name}.{file_extension}'
+    print(f"Starting to scrape races. Output file: {file_path}")
 
-    with file_writer(file_path) as csv:
-        csv.write(settings.csv_header + '\n')
+    try:
+        with file_writer(file_path) as csv:
+            csv.write(settings.csv_header + '\n')
+            print("Wrote CSV header.")
 
-        for url in races:
-            r = requests.get(url, headers=random_header.header())
-            doc = html.fromstring(r.content)
+            for url in races:
+                print(f"Processing race URL: {url}")
+                
+                r = requests.get(url, headers=random_header.header())
+                doc = html.fromstring(r.content)
 
-            try:
-                race = Race(url, doc, code, settings.fields)
-            except VoidRaceError:
-                continue
-
-            if code == 'flat':
-                if race.race_info['type'] != 'Flat':
+                try:
+                    race = Race(url, doc, code, settings.fields)
+                except VoidRaceError:
+                    print(f"VoidRaceError encountered for URL: {url}. Skipping.")
                     continue
-            elif code == 'jumps':
-                if race.race_info['type'] not in {'Chase', 'Hurdle', 'NH Flat'}:
+
+                if code == 'flat' and race.race_info['type'] != 'Flat':
+                    print(f"Race type '{race.race_info['type']}' does not match 'Flat'. Skipping.")
+                    continue
+                elif code == 'jumps' and race.race_info['type'] not in {'Hurdle'}:
+                    print(f"Race type '{race.race_info['type']}' does not match 'Hurdle'. Skipping.")
                     continue
 
-            for row in race.csv_data:
-                csv.write(row + '\n')
+                for row in race.csv_data:
+                    csv.write(row + '\n')
+                    print(f"Wrote race data to CSV for URL: {url}")
 
-        print(
-            f'Finished scraping.\n{file_name}.{file_extension} saved in rpscrape/{out_dir.lstrip("../")}'
-        )
+        print("Finished scraping races.")
+    except Exception as e:
+        print(f"Error occurred during race scraping: {e}")
+        raise
+
+    # Call the amend_csv function to modify the CSV after it is generated
+    amend_csv(file_path)
+    print("CSV scraping and amendment process complete.")
+    amend_csv_remove_columns(file_path)
+    print("CSV remove columns process complete.")
+
 
 
 def writer_csv(file_path):

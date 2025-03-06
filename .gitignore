@@ -2,6 +2,7 @@ data/
 racecards/
 .idea/
 .vscode/
+.vs/
 __*/
 
 .DS_Store

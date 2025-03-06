@@ -5,6 +5,10 @@ import requests
 import os
 import sys
 import csv
+import time
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+from lxml import html
 
 from dataclasses import dataclass
 
@@ -200,6 +204,13 @@ def scrape_races(races, folder_name, file_name, file_extension, code, file_write
     file_path = f'{out_dir}/{file_name}.{file_extension}'
     print(f"Starting to scrape races. Output file: {file_path}")
 
+    # Set up retry mechanism
+    session = requests.Session()
+    retry = Retry(connect=3, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+
     try:
         with file_writer(file_path) as csv:
             csv.write(settings.csv_header + '\n')
@@ -207,26 +218,34 @@ def scrape_races(races, folder_name, file_name, file_extension, code, file_write
 
             for url in races:
                 print(f"Processing race URL: {url}")
-                
-                r = requests.get(url, headers=random_header.header())
-                doc = html.fromstring(r.content)
 
                 try:
+                    r = session.get(url, headers=random_header.header())
+                    r.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+                    doc = html.fromstring(r.content)
+
                     race = Race(url, doc, code, settings.fields)
+                    
+                    if code == 'flat' and race.race_info['type'] != 'Flat':
+                        print(f"Race type '{race.race_info['type']}' does not match 'Flat'. Skipping.")
+                        continue
+                    elif code == 'jumps' and race.race_info['type'] not in {'Hurdle'}:
+                        print(f"Race type '{race.race_info['type']}' does not match 'Hurdle'. Skipping.")
+                        continue
+
+                    for row in race.csv_data:
+                        csv.write(row + '\n')
+                        print(f"Wrote race data to CSV for URL: {url}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"Request error for URL: {url}. Error: {e}")
+                    continue
                 except VoidRaceError:
                     print(f"VoidRaceError encountered for URL: {url}. Skipping.")
                     continue
 
-                if code == 'flat' and race.race_info['type'] != 'Flat':
-                    print(f"Race type '{race.race_info['type']}' does not match 'Flat'. Skipping.")
-                    continue
-                elif code == 'jumps' and race.race_info['type'] not in {'Hurdle'}:
-                    print(f"Race type '{race.race_info['type']}' does not match 'Hurdle'. Skipping.")
-                    continue
-
-                for row in race.csv_data:
-                    csv.write(row + '\n')
-                    print(f"Wrote race data to CSV for URL: {url}")
+                print("Time delay of 3 seconds before next scrape")
+                time.sleep(3)
 
         print("Finished scraping races.")
     except Exception as e:
@@ -234,10 +253,10 @@ def scrape_races(races, folder_name, file_name, file_extension, code, file_write
         raise
 
     # Call the amend_csv function to modify the CSV after it is generated
-    amend_csv(file_path)
-    print("CSV scraping and amendment process complete.")
-    amend_csv_remove_columns(file_path)
-    print("CSV remove columns process complete.")
+  #  amend_csv(file_path)
+  #  print("CSV scraping and amendment process complete.")
+  #  amend_csv_remove_columns(file_path)
+  #  print("CSV remove columns process complete.")
 
 
 

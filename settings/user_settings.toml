@@ -49,7 +49,7 @@ gzip_output = false     # If false save uncompressed .csv files, if true save co
     sex = false          # Sex of horse
     
     wgt = false         # Weight in stones/pounds
-    lbs = true          # Weight in pounds
+    lbs = false          # Weight in pounds
     
     hg = false           # Headgear
     

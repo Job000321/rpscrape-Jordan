@@ -1,0 +1,2 @@
+./rpscrape.py -d 2025/03/01-2025/03/07 -r gb -t jumps
+./rpscrape.py -d 2025/03/01-2025/03/03 -r ire -t jumps

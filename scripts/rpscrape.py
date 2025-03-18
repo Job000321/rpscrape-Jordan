@@ -99,59 +99,12 @@ def get_race_urls_date(dates, region):
 
     return sorted(list(urls))
 
+
 def amend_csv(file_path):
     """
-    Amend the generated CSV file by adding a new column 'amended ts'
-    with a formula N2 + (154 - K2) for each row.
+    Change the column header in column K1 from 'or' to 'bhaor', replace all '(IRE)', '(USA)', '(GB)', '(FR)', '(JPN)' 
+    instances with nothing, and replace non-numeric values in columns K, L, M, and I with 0 (except in row 1).
     """
-    print(f"Starting to amend the CSV file: {file_path}")
-    
-    temp_file = file_path + '.tmp'  # Temporary file to store amended data
-    print(f"Creating a temporary file: {temp_file}")
-
-    try:
-        with open(file_path, 'r', encoding='utf-8') as infile, open(temp_file, 'w', encoding='utf-8', newline='') as outfile:
-            print(f"Opened {file_path} for reading and {temp_file} for writing.")
-            
-            reader = csv.reader(infile)
-            writer = csv.writer(outfile)
-            
-            # Read the header row and add the new column
-            header = next(reader)
-            print(f"Original header: {header}")
-            header.append('amended ts')  # Add the new column
-            writer.writerow(header)
-            print("Amended the header and wrote it to the temporary file.")
-            
-            # Process and amend the rows
-            for row in reader:
-                # Extract N2 and K2 from the row, assuming N2 is in column 0 and K2 in column 1
-                # Convert to numeric values for calculation
-                try:
-                    n2 = float(row[13])  # Adjust column index if N2 is not in the 0th column
-                    k2 = float(row[10])  # Adjust column index if K2 is not in the 1st column
-                    amended_value = n2 + (154 - k2)  # Compute the amended value
-                except ValueError:
-                    # Handle rows where conversion fails (e.g., if N2/K2 are not numbers)
-                    amended_value = 0
-                
-                row.append(amended_value)  # Add the calculated value to the new column
-                
-                writer.writerow(row)  # Write the updated row to the temporary file
-            print("Processed all rows, added amendments")
-    except Exception as e:
-        print(f"Error occurred while amending the CSV: {e}")
-        raise
-
-    # Replace original file with amended file
-    os.replace(temp_file, file_path)
-    print(f"Replaced original CSV with amended CSV: {file_path}")
-    
-def amend_csv_remove_columns(file_path):
-    """
-    Remove columns with specific headers ('lbs', 'rpr', 'ts') from the CSV file.
-    """
-    headers_to_remove = ["lbs", "rpr", "ts"]  # Headers to target for removal
     print(f"Starting to process the CSV file: {file_path}")
     
     temp_file = file_path + '.tmp'  # Temporary file to store amended data
@@ -168,29 +121,45 @@ def amend_csv_remove_columns(file_path):
             header = next(reader)
             print(f"Original header: {header}")
             
-            # Identify the indices of the columns to remove based on the header values
-            indices_to_remove = [idx for idx, col in enumerate(header) if col in headers_to_remove]
-            print(f"Columns to remove (indices): {indices_to_remove}")
+            # Modify the header only for column K (11th column, index 10)
+            if len(header) > 10 and header[10] == 'or':  # Check if column K exists and has the value 'or'
+                header[10] = 'bhaor'
+            print(f"Updated header: {header}")
             
-            # Create a new header without the columns to remove
-            updated_header = [col for idx, col in enumerate(header) if idx not in indices_to_remove]
-            writer.writerow(updated_header)
-            print(f"Updated header: {updated_header}")
+            # Write the updated header to the new file
+            writer.writerow(header)
             
-            # Process each row and remove the corresponding columns
+            # List of nationalities to replace
+            nationalities = ['(IRE)', '(USA)', '(GB)', '(FR)', '(JPN)']
+            
+            # Process the remaining rows
             for row in reader:
-                updated_row = [val for idx, val in enumerate(row) if idx not in indices_to_remove]
+                # Replace all instances of nationalities with nothing
+                updated_row = [
+                    cell if not any(nat in cell for nat in nationalities) else
+                    cell.replace('(IRE)', '').replace('(USA)', '').replace('(GB)', '').replace('(FR)', '').replace('(JPN)', '')
+                    for cell in row
+                ]
+                
+                # Replace non-numeric values in columns K, L, M, and I with 0
+                for index in [10, 11, 12, 8]:  # Indices for columns K, L, M, and I
+                    if index < len(updated_row):  # Ensure the column exists in the row
+                        if not updated_row[index].isdigit():  # Check if it's not numeric
+                            updated_row[index] = '0'  # Replace with '0'
+                
                 writer.writerow(updated_row)
-            print("Processed all rows and removed the specified columns.")
+            print("Processed all rows, updated header, replaced nationalities, and handled non-numeric values.")
     except Exception as e:
         print(f"Error occurred while processing the CSV: {e}")
         raise
 
     # Replace the original file with the updated file
     os.replace(temp_file, file_path)
-    print(f"Replaced original CSV with updated CSV: {file_path}")    
+    print(f"Replaced original CSV with updated CSV: {file_path}")
 
 
+
+    
 def scrape_races(races, folder_name, file_name, file_extension, code, file_writer):
     """
     Scrape races and write results to a CSV file with echo commands.
@@ -248,17 +217,13 @@ def scrape_races(races, folder_name, file_name, file_extension, code, file_write
                 time.sleep(3)
 
         print("Finished scraping races.")
+        
+        # Call amend_csv_change_header to update the header in column K1
+        amend_csv(file_path)
+        print("CSV header successfully amended.")
     except Exception as e:
         print(f"Error occurred during race scraping: {e}")
         raise
-
-    # Call the amend_csv function to modify the CSV after it is generated
-  #  amend_csv(file_path)
-  #  print("CSV scraping and amendment process complete.")
-  #  amend_csv_remove_columns(file_path)
-  #  print("CSV remove columns process complete.")
-
-
 
 def writer_csv(file_path):
     return open(file_path, 'w', encoding='utf-8')

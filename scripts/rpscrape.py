@@ -121,9 +121,9 @@ def amend_csv(file_path):
             header = next(reader)
             print(f"Original header: {header}")
             
-            # Modify the header only for column K (11th column, index 10)
-            if len(header) > 10 and header[10] == 'or':  # Check if column K exists and has the value 'or'
-                header[10] = 'bhaor'
+            # Modify the header only for column K (23rd column, index 23)
+            if len(header) > 22 and header[22] == 'or':  # Check if column X exists and has the value 'or'
+                header[22] = 'bhaor'
             print(f"Updated header: {header}")
             
             # Write the updated header to the new file
@@ -141,11 +141,14 @@ def amend_csv(file_path):
                     for cell in row
                 ]
                 
-                # Replace non-numeric values in columns K, L, M, and I with 0
-                for index in [10, 11, 12, 8]:  # Indices for columns K, L, M, and I
+                # Replace non-numeric values in columns L, M, S, W, X, Y
+                for index in [11, 17, 21, 22, 23]:  # Indices for columns L, M, S, W, X, Y
                     if index < len(updated_row):  # Ensure the column exists in the row
-                        if not updated_row[index].isdigit():  # Check if it's not numeric
-                            updated_row[index] = '0'  # Replace with '0'
+                        try:
+                # Try converting the value to a float (handles both integers and decimals)
+                           float(updated_row[index])
+                        except ValueError:   
+                            updated_row[index] = '0'  # Replace with '0'         
                 
                 writer.writerow(updated_row)
             print("Processed all rows, updated header, replaced nationalities, and handled non-numeric values.")
@@ -224,6 +227,7 @@ def scrape_races(races, folder_name, file_name, file_extension, code, file_write
     except Exception as e:
         print(f"Error occurred during race scraping: {e}")
         raise
+        
 
 def writer_csv(file_path):
     return open(file_path, 'w', encoding='utf-8')

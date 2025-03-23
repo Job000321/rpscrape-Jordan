@@ -14,7 +14,7 @@ gzip_output = false     # If false save uncompressed .csv files, if true save co
     course_id = false   # RP Course ID
     course = true       # Course name
 
-    race_id = false     # RP race ID
+    race_id = true     # RP race ID
     off = false          # Race off time
     race_name = true    # Race name
 
@@ -29,10 +29,10 @@ gzip_output = false     # If false save uncompressed .csv files, if true save co
     dist = false         # Distance in miles/furlongs/yards
     dist_f = true       # Distance in furlongs
     dist_m = false       # Distance in metres
-    dist_y = false      # Distance in yards
+    dist_y = true      # Distance in yards
     
     going = true        # Going description
-    surface = false     # Surface Turf/Dirt/AW
+    surface = true     # Surface Turf/Dirt/AW
     ran = false          # Number of runners in race
 
 [fields.runner_info]
@@ -43,26 +43,26 @@ gzip_output = false     # If false save uncompressed .csv files, if true save co
     ovr_btn = false      # Total number of lengths beaten
     btn = false          # Lengths behind nearest horse in front
     
-    horse_id = false    # RP Horse ID
+    horse_id = true    # RP Horse ID
     horse = true        # Name of horse
-    age = false          # Age of horse
-    sex = false          # Sex of horse
+    age = true          # Age of horse
+    sex = true          # Sex of horse
     
     wgt = false         # Weight in stones/pounds
-    lbs = false          # Weight in pounds
+    lbs = true          # Weight in pounds
     
     hg = false           # Headgear
     
     time = false         # Time in minutes/seconds
-    secs = false         # Time in seconds
+    secs = true         # Time in seconds
     
     sp = false          # fractional odds
-    dec = false          # decimal odds
+    dec = true          # decimal odds
     
     jockey_id = false   # RP Jockey ID
-    jockey = false       # Jockey name
+    jockey = true       # Jockey name
     trainer_id = false  # RP Trainer ID
-    trainer = false      # Trainer name
+    trainer = true      # Trainer name
     
     prize = false        # Prizemoney
     

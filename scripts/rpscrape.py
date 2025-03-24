@@ -258,7 +258,8 @@ def main():
 
         if args.date:
             folder_name = 'dates/' + args.region
-            file_name = args.date.replace('/', '_')
+            file_name = "rp_database_csv"
+           #file_name = args.date.replace('/', '_')
             races = get_race_urls_date(parser.dates, args.region)
         else:
             folder_name = args.region if args.region else course_name(args.course)

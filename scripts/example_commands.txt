@@ -1,2 +1,12 @@
-./rpscrape.py -d 2025/03/01-2025/03/07 -r gb -t jumps
-./rpscrape.py -d 2025/03/01-2025/03/03 -r ire -t jumps
+./rpscrape.py -d 2025/03/08-2025/03/12 -t jumps
+./rpscrape.py -d 2025/03/15 -r ire -t jumps
+./rpscrape.py -d 2025/03/15 -r gb -t jumps
+
+----------------
+PostgresSQL commands for inputting csv file
+
+\copy race_results (date, course, race_name, type, class, pattern, dist_f, going, pos, horse, bhaor, rpr, ts, comment) FROM 'C:\\Users\\job00\\Desktop\\rp_database_csv.csv' DELIMITER ',' CSV HEADER;
+
+\copy race_results (date, course, race_name, type, class, pattern, dist_f, going, pos, horse, bhaor, rpr, ts, comment) FROM 'C:\\Users\\job00\\coding_workspace\\rpscrape-Jordan\\data\\dates\\gb\\jumps\\rp_database_csv.csv' DELIMITER ',' CSV HEADER;
+
+\copy race_results (date, course, race_name, type, class, pattern, dist_f, going, pos, horse, bhaor, rpr, ts, comment) FROM 'C:\\Users\\job00\\coding_workspace\\rpscrape-Jordan\\data\\dates\\ire\\jumps\\rp_database_csv.csv' DELIMITER ',' CSV HEADER;

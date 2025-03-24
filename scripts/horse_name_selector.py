@@ -59,7 +59,7 @@ def get_runners(session, profile_urls):
 def generate_sql(race_name, horse_names):
     names = "', '".join(horse_names)
     # print(names)
-    return f"-- SQL for race: {race_name}\nSELECT * from race_results where horse in ('{names}');"
+    return f"-- SQL for race: {race_name}\nSELECT date, horse, course, going, pos, ts, rpr, dist_f, race_name from race_results where horse in ('{names}');"
 
 def parse_races(session, race_urls):
     race_sql_statements = []

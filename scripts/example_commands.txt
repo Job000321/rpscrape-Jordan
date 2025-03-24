@@ -3,6 +3,11 @@
 ./rpscrape.py -d 2025/03/15 -r gb -t jumps
 
 ----------------
+
+./horse_name_selector.py today
+./horse_name_selector.py tomorrow
+
+----------------
 PostgresSQL commands for inputting csv file
 
 \copy race_results (date, course, race_name, type, class, pattern, dist_f, going, pos, horse, bhaor, rpr, ts, comment) FROM 'C:\\Users\\job00\\Desktop\\rp_database_csv.csv' DELIMITER ',' CSV HEADER;
